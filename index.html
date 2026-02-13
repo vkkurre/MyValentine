@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="A cute Valentine's Day page to ask someone to be your Valentine!">
+  <meta name="theme-color" content="#ffd0e5">
+  <title>Valentine's Day</title>
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+  <style>
+    .gradient-background {
+      background: linear-gradient(180deg, #ffd0e5 0%, #ffe8f2 36%, #ffffff 100%);
+      min-height: 100vh;
+    }
+
+    .bounce {
+      animation: bounce 2s ease infinite;
+    }
+
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+      }
+      40% {
+        transform: translateY(-20px);
+      }
+      60% {
+        transform: translateY(-10px);
+      }
+    }
+
+    @keyframes floatHearts {
+      0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 0.15;
+      }
+      50% {
+        opacity: 0.1;
+      }
+      100% {
+        transform: translateY(-100vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    .heart {
+      position: fixed;
+      bottom: -50px;
+      font-size: 30px;
+      opacity: 0.15;
+      animation: floatHearts 8s ease-in-out infinite;
+      pointer-events: none;
+      z-index: 1;
+    }
+    @media (max-width: 600px) {
+            .greeting {
+                font-size: 1.3rem;
+            }
+            .card {
+                padding: 40px 25px;
+            }
+            .gif-container {
+                height: 220px;
+            }
+        }
+        .greeting {
+            text-align: center;
+            font-family: 'Dancing Script', cursive;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #ff1493;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 8px rgba(255, 20, 147, 0.3);
+            animation: bounce 1s ease-in-out 0.5s;
+            line-height: 1.6;
+            letter-spacing: 0.5px;
+        }
+  </style>
+  <!-- Preload images so transitions feel instant -->
+  <link rel="preload" as="image" href="./images/image1.gif">
+  <link rel="preload" as="image" href="./images/image2.gif">
+  <link rel="preload" as="image" href="./images/image3.gif">
+  <link rel="preload" as="image" href="./images/image4.gif">
+  <link rel="preload" as="image" href="./images/image5.gif">
+  <link rel="preload" as="image" href="./images/image6.gif">
+  <link rel="preload" as="image" href="./images/image7.gif">
+</head>
+<body class="gradient-background">
+  <main class="flex items-center justify-center h-screen">
+    <section class="flex flex-col items-center p-4">
+      <img
+        id="imageDisplay"
+        src="./images/image1.gif"
+        alt="Cute kitten with flowers"
+        class="rounded-md h-[300px] object-cover"
+      />
+      <h1 id="greeting" class="greeting">Hey Khushboo!<br>Will you be my Valentine? 💕</h1>
+      <div id="responseButtons" class="flex gap-4 pt-5 items-center">
+        <button
+          id="yesButton"
+          class="bounce inline-flex items-center justify-center whitespace-nowrap text-xl font-medium cursor-pointer px-6 py-3 text-white transition-all duration-300 ease-in-out min-h-12 min-w-[75px]"
+          style="background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); border-radius: 20px; box-shadow: 0 4px 15px rgba(72, 187, 120, 0.4); border: none;"
+          onmouseover="this.style.boxShadow='0 6px 20px rgba(72, 187, 120, 0.6)'; this.style.transform='translateY(-2px)';"
+          onmouseout="this.style.boxShadow='0 4px 15px rgba(72, 187, 120, 0.4)'; this.style.transform='translateY(0)';"
+        >
+          Yes
+        </button>
+        <button
+          id="noButton"
+          class="inline-flex items-center justify-center whitespace-nowrap text-xl font-medium cursor-pointer px-6 py-3 text-white h-12 min-w-[75px]"
+          style="background: linear-gradient(135deg, #fc8181 0%, #f56565 100%); border-radius: 20px; box-shadow: 0 4px 15px rgba(245, 101, 101, 0.4); border: none; transition: left 0.5s ease-in-out, top 0.5s ease-in-out, box-shadow 0.3s, transform 0.3s;"
+          onmouseover="this.style.boxShadow='0 6px 20px rgba(245, 101, 101, 0.6)'; this.style.transform='translateY(-2px)';"
+          onmouseout="this.style.boxShadow='0 4px 15px rgba(245, 101, 101, 0.4)'; this.style.transform='translateY(0)';"
+        >
+          No
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    (() => {
+      // DOM references
+      const yesButton = document.getElementById('yesButton');
+      const noButton = document.getElementById('noButton');
+      const imageDisplay = document.getElementById('imageDisplay');
+      const greeting = document.getElementById('greeting');
+      const responseButtons = document.getElementById('responseButtons');
+
+      // Configuration
+      const GROWTH_PER_CLICK = 35;
+      const FONT_GROWTH_PER_CLICK = 25;
+      const MAX_NO_CLICKS = 5;
+
+      const IMAGE_PATHS = [
+        './images/image1.gif',
+        './images/image2.gif',
+        './images/image3.gif',
+        './images/image4.gif',
+        './images/image5.gif',
+        './images/image6.gif',
+        './images/image7.gif',
+      ];
+
+      const NO_BUTTON_MESSAGES = [
+        'Hey Khushboo!<br>Will you be my Valentine? 💕',
+        'Are you sure? 🥺',
+        'Pookie please 🙏',
+        "Don't do this to me :( 💔",
+        "You're breaking my heart 😢",
+        "I'm gonna cry... 😭",
+      ];
+
+      const ALT_TEXTS = [
+        'Cute kitten with flowers',
+        'Sad kitten looking up',
+        'Kitten begging',
+        'Heartbroken kitten',
+        'Crying kitten',
+        'Devastated kitten',
+        'Happy kitten celebrating',
+      ];
+
+      // State
+      let noClickCount = 0;
+      let buttonHeight = 48;
+      let buttonWidth = 80;
+      let fontSize = 20;
+
+      // Function to create floating hearts from bottom
+      function createFloatingHearts() {
+        const heartCount = 5;
+        for (let i = 0; i < heartCount; i++) {
+          setTimeout(() => {
+            const heart = document.createElement('div');
+            heart.className = 'heart';
+            heart.textContent = '💕';
+            heart.style.left = `${Math.random() * 100}%`;
+            heart.style.animationDelay = `${Math.random() * 2}s`;
+            heart.style.animationDuration = `${6 + Math.random() * 4}s`;
+            document.body.appendChild(heart);
+            
+            // Remove heart after animation completes
+            setTimeout(() => {
+              heart.remove();
+            }, 10000);
+          }, i * 100);
+        }
+      }
+
+      // Start continuous heart animation
+      function startContinuousHearts() {
+        createFloatingHearts();
+        setInterval(() => {
+          createFloatingHearts();
+        }, 3000); // Create new hearts every 3 seconds
+      }
+
+      // Start hearts when page loads
+      startContinuousHearts();
+
+      noButton.addEventListener('click', () => {
+        if (noClickCount >= MAX_NO_CLICKS) return;
+
+        noClickCount++;
+
+        // Update image and alt text
+        imageDisplay.src = IMAGE_PATHS[noClickCount];
+        imageDisplay.alt = ALT_TEXTS[noClickCount];
+
+        // Grow the "Yes" button to make it harder to ignore
+        buttonHeight += GROWTH_PER_CLICK;
+        buttonWidth += GROWTH_PER_CLICK;
+        fontSize += FONT_GROWTH_PER_CLICK;
+
+        yesButton.style.height = `${buttonHeight}px`;
+        yesButton.style.width = `${buttonWidth}px`;
+        yesButton.style.fontSize = `${fontSize}px`;
+
+        // Update greeting message with increasingly desperate messages
+        greeting.innerHTML = NO_BUTTON_MESSAGES[noClickCount];
+
+        // Check if we've reached the last message
+        if (noClickCount >= MAX_NO_CLICKS) {
+          // Hide the No button when reaching the last message
+          noButton.style.display = 'none';
+        } else {
+          // Change position to fixed before calculating new position
+          noButton.style.position = 'fixed';
+          
+          // Move the "No" button to a random position on screen
+          const maxX = window.innerWidth - noButton.offsetWidth - 20;
+          const maxY = window.innerHeight - noButton.offsetHeight - 20;
+          const randomX = Math.floor(Math.random() * maxX);
+          const randomY = Math.floor(Math.random() * maxY);
+          
+          noButton.style.left = `${randomX}px`;
+          noButton.style.top = `${randomY}px`;
+        }
+      });
+
+      yesButton.addEventListener('click', () => {
+        imageDisplay.src = IMAGE_PATHS[IMAGE_PATHS.length - 1];
+        imageDisplay.alt = ALT_TEXTS[ALT_TEXTS.length - 1];
+        greeting.innerHTML = 'Yayyy!! I knew you would say yes! 💖';
+        responseButtons.style.display = 'none';
+
+        // Heart-shaped confetti for a valentine theme
+        const heart = confetti.shapeFromPath({
+          path: 'M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z',
+        });
+
+        const defaults = { spread: 360, ticks: 100, gravity: 0, decay: 0.94, startVelocity: 20, shapes: [heart], colors: ['#ff69b4', '#ff1493', '#ff6b81', '#e84393'] };
+
+        confetti({ ...defaults, particleCount: 50, scalar: 2 });
+        confetti({ ...defaults, particleCount: 25, scalar: 3 });
+        confetti({ ...defaults, particleCount: 10, scalar: 4 });
+      });
+    })();
+  </script>
+</body>
+</html>
